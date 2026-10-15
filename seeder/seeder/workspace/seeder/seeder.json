@@ -1,0 +1,36 @@
+{
+ "charts": [],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Seed demo data</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Seeder\",\"col\":3}}]",
+ "creation": "2026-10-15 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "database",
+ "idx": 0,
+ "label": "Seeder",
+ "links": [],
+ "module": "Seeder",
+ "modified": "2026-10-15 00:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "Seeder",
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ],
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Seeder",
+   "link_to": "seeder",
+   "type": "Page"
+  }
+ ],
+ "title": "Seeder"
+}
