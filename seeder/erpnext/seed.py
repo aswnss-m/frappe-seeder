@@ -20,7 +20,7 @@ import uuid
 from datetime import date, timedelta
 
 import frappe
-from frappe.utils import add_days, flt, getdate, nowdate
+from frappe.utils import add_days, add_to_date, flt, getdate, nowdate
 
 FIRST_NAMES = [
 	"Aarav", "Priya", "Liam", "Olivia", "Mateo", "Sofia", "Kenji", "Yuki", "Amara", "Kwame",
@@ -753,16 +753,18 @@ class ErpnextSeeder(ModulesMixin):
 		Works whatever the existing year looks like: calendar years, April-to-March years, or none.
 		"""
 		for year in range(self.start.year, self.today.year + 1):
-			for start, end in _uncovered_ranges(date(year, 1, 1), date(year, 12, 31)):
-				frappe.get_doc(
-					{
-						"doctype": "Fiscal Year",
-						"year": f"Seeder {start.isoformat()}",
-						"year_start_date": start,
-						"year_end_date": end,
-						"companies": [{"company": self.company}],
-					}
-				).insert(ignore_permissions=True)
+			for gap_start, gap_end in _uncovered_ranges(date(year, 1, 1), date(year, 12, 31)):
+				for start, end, is_short in _fiscal_year_chunks(gap_start, gap_end):
+					frappe.get_doc(
+						{
+							"doctype": "Fiscal Year",
+							"year": f"Seeder {start.isoformat()}",
+							"year_start_date": start,
+							"year_end_date": end,
+							"is_short_year": 1 if is_short else 0,
+							"companies": [{"company": self.company}],
+						}
+					).insert(ignore_permissions=True)
 
 	def _load_defaults(self):
 		self.cost_center = _ensure_cost_center(self.company)
@@ -1240,6 +1242,20 @@ def _uncovered_ranges(start, end):
 	if cursor <= end:
 		ranges.append((cursor, end))
 	return ranges
+
+
+def _fiscal_year_chunks(start, end):
+	"""Split a gap into fiscal years of at most one year each, as (start, end, is_short) triples.
+
+	ERPNext only accepts a year that ends one year less a day after it starts, unless it is
+	flagged as a short year. A partial gap, such as January to March beside an April-to-March
+	year, therefore becomes a short year.
+	"""
+	while start <= end:
+		full_end = add_days(add_to_date(start, years=1), -1)
+		chunk_end = min(full_end, end)
+		yield start, chunk_end, chunk_end != full_end
+		start = add_days(chunk_end, 1)
 
 
 def _is_conflict(exc):
